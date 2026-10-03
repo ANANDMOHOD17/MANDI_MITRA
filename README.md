@@ -57,6 +57,14 @@ Then open **http://localhost:5000** in your browser.
   - Print-friendly layout that strips away navigation and controls.
 - **Dynamic Pagination**: Client and server-side paginated browsing through 950+ daily market records.
 
+### 4. 🔴 Real-Time Daily Mandi Data & AGMARKNET Feed (`/live`)
+- **Live Pan-India Market Stream**: Connects to the official Government of India `data.gov.in` AGMARKNET API (Resource `9ef84268-d588-465a-a308-a864a43d0070`).
+- **Complete State & District Granularity**: Real-time modal, min, and max prices covering 18+ agricultural states and 80+ districts across India.
+- **Cascading Dropdowns**: Selecting a State dynamically populates its respective districts.
+- **Key Summary Metrics**: Real-time stats showing today's reporting mandis, total active records, and highest/lowest priced crops nationwide.
+- **Resilient Fallback & Cache Engine**: Local high-speed caching with self-healing bootstrap, retry backoffs, and instant client filtering.
+- **Auto-Refresh Countdown**: Live 5-minute polling ticker with manual refresh option and one-click CSV export.
+
 ---
 
 ## 📊 Agricultural Dataset (Mirroring AGMARKNET & eNAM)
@@ -129,6 +137,15 @@ flowchart TD
 ### 3. Reporting APIs
 - `GET /api/reports/daily?date=&state=&commodity_id=&page=1&per_page=50`: Paginated daily price records with metadata.
 - `GET /api/reports/download?date=&state=&commodity_id=`: Direct CSV file download.
+
+### 4. Real-Time Mandi Live APIs
+- `GET /live`: Full-screen live price portal with auto-refresh and CSV export.
+- `GET /api/live/prices?state=&district=&commodity=&page=1&per_page=50`: Pan-India real-time daily price stream.
+- `GET /api/live/states`: List all states reporting prices today.
+- `GET /api/live/districts?state=<state>`: Cascading district list for a selected state.
+- `GET /api/live/commodities`: List all agricultural commodities trading today.
+- `GET /api/live/summary`: Overview statistics (total records, states active, high/low price crops, source status).
+- `POST /api/live/refresh`: Trigger manual live cache refresh (supports custom `api_key`).
 
 ---
 

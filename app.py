@@ -5,6 +5,8 @@ import statistics
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
+import sys
+from data.live_data import fetch_live_prices, get_all_states, get_districts, get_commodities_list, refresh_cache
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -791,6 +793,78 @@ def get_reports_download():
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment; filename=mandi_report_{date_filter}.csv"}
     )
+
+@app.route('/live')
+def live_page():
+    return render_template('live.html')
+
+@app.route('/api/live/prices')
+def get_live_prices():
+    state = request.args.get('state')
+    district = request.args.get('district')
+    commodity = request.args.get('commodity')
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('per_page', 100))
+    
+    result = fetch_live_prices(state=state, district=district, commodity=commodity, limit=limit, page=page)
+    return jsonify(result)
+
+@app.route('/api/live/states')
+def get_live_states():
+    return jsonify(get_all_states())
+
+@app.route('/api/live/districts')
+def get_live_districts():
+    state = request.args.get('state')
+    return jsonify(get_districts(state))
+
+@app.route('/api/live/commodities')
+def get_live_commodities():
+    return jsonify(get_commodities_list())
+
+@app.route('/api/live/summary')
+def get_live_summary():
+    data = fetch_live_prices(limit=100000, page=1)  # Getting enough records for summary
+    records = data.get('records', [])
+    
+    states_covered = len(set(r.get('state') for r in records if r.get('state')))
+    
+    highest_price_record = None
+    lowest_price_record = None
+    
+    for r in records:
+        price = r.get('modal_price', 0)
+        if price > 0:
+            if not highest_price_record or price > highest_price_record.get('modal_price', 0):
+                highest_price_record = r
+            if not lowest_price_record or price < lowest_price_record.get('modal_price', float('inf')):
+                lowest_price_record = r
+                
+    highest = None
+    if highest_price_record:
+        highest = f"{highest_price_record.get('commodity')} (₹{highest_price_record.get('modal_price')})"
+        
+    lowest = None
+    if lowest_price_record:
+        lowest = f"{lowest_price_record.get('commodity')} (₹{lowest_price_record.get('modal_price')})"
+        
+    return jsonify({
+        'total_records': data.get('total', 0),
+        'states_covered': states_covered,
+        'highest_priced': highest,
+        'lowest_priced': lowest,
+        'last_updated': data.get('last_updated'),
+        'source': data.get('source')
+    })
+
+@app.route('/api/live/refresh', methods=['POST'])
+def force_refresh_live_data():
+    req_data = request.get_json(silent=True) or {}
+    api_key = req_data.get('api_key') or request.args.get('api_key')
+    success = refresh_cache(api_key=api_key)
+    if success:
+        return jsonify({'status': 'success', 'source': 'live'})
+    return jsonify({'status': 'cached', 'source': 'cache', 'message': 'Loaded from verified local cache (data.gov.in unreachable or key invalid)'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
