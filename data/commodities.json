@@ -1,0 +1,219 @@
+[
+  {
+    "id": "C01",
+    "name": "Wheat",
+    "category": "Cereals",
+    "unit": "Quintal",
+    "msp": 2275
+  },
+  {
+    "id": "C02",
+    "name": "Rice (Paddy)",
+    "category": "Cereals",
+    "unit": "Quintal",
+    "msp": 2183
+  },
+  {
+    "id": "C03",
+    "name": "Onion",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C04",
+    "name": "Tomato",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C05",
+    "name": "Potato",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C06",
+    "name": "Soybean",
+    "category": "Oilseeds",
+    "unit": "Quintal",
+    "msp": 4600
+  },
+  {
+    "id": "C07",
+    "name": "Cotton",
+    "category": "Cash Crops",
+    "unit": "Quintal",
+    "msp": 6620
+  },
+  {
+    "id": "C08",
+    "name": "Chana (Gram)",
+    "category": "Pulses",
+    "unit": "Quintal",
+    "msp": 5440
+  },
+  {
+    "id": "C09",
+    "name": "Tur (Arhar)",
+    "category": "Pulses",
+    "unit": "Quintal",
+    "msp": 7000
+  },
+  {
+    "id": "C10",
+    "name": "Moong",
+    "category": "Pulses",
+    "unit": "Quintal",
+    "msp": 8558
+  },
+  {
+    "id": "C11",
+    "name": "Urad",
+    "category": "Pulses",
+    "unit": "Quintal",
+    "msp": 6950
+  },
+  {
+    "id": "C12",
+    "name": "Maize",
+    "category": "Cereals",
+    "unit": "Quintal",
+    "msp": 2090
+  },
+  {
+    "id": "C13",
+    "name": "Bajra",
+    "category": "Cereals",
+    "unit": "Quintal",
+    "msp": 2500
+  },
+  {
+    "id": "C14",
+    "name": "Jowar",
+    "category": "Cereals",
+    "unit": "Quintal",
+    "msp": 3180
+  },
+  {
+    "id": "C15",
+    "name": "Groundnut",
+    "category": "Oilseeds",
+    "unit": "Quintal",
+    "msp": 6377
+  },
+  {
+    "id": "C16",
+    "name": "Mustard",
+    "category": "Oilseeds",
+    "unit": "Quintal",
+    "msp": 5650
+  },
+  {
+    "id": "C17",
+    "name": "Sunflower",
+    "category": "Oilseeds",
+    "unit": "Quintal",
+    "msp": 6760
+  },
+  {
+    "id": "C18",
+    "name": "Sugarcane",
+    "category": "Cash Crops",
+    "unit": "Quintal",
+    "msp": 315
+  },
+  {
+    "id": "C19",
+    "name": "Garlic",
+    "category": "Spices",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C20",
+    "name": "Ginger",
+    "category": "Spices",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C21",
+    "name": "Green Chilli",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C22",
+    "name": "Banana",
+    "category": "Fruits",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C23",
+    "name": "Apple",
+    "category": "Fruits",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C24",
+    "name": "Mango",
+    "category": "Fruits",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C25",
+    "name": "Turmeric",
+    "category": "Spices",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C26",
+    "name": "Coriander",
+    "category": "Spices",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C27",
+    "name": "Cumin",
+    "category": "Spices",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C28",
+    "name": "Brinjal",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C29",
+    "name": "Cauliflower",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C30",
+    "name": "Cabbage",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  },
+  {
+    "id": "C31",
+    "name": "Lady Finger",
+    "category": "Vegetables",
+    "unit": "Quintal",
+    "msp": null
+  }
+]
