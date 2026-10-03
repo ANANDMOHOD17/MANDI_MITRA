@@ -134,7 +134,29 @@
         <!-- Left Side: Main Input Panel -->
         <div class="w-full lg:w-1/3 xl:w-1/4 flex-shrink-0">
             <div class="bg-white rounded-xl shadow-md p-5 border-t-4 border-brand sticky top-24">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2"><i class="fa-solid fa-sliders text-brand mr-2"></i> Search Criteria</h3>
+                <h3 class="text-lg font-bold text-gray-800 mb-3 border-b pb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-sliders text-brand mr-2"></i> Search Criteria</span>
+                </h3>
+
+                <!-- Live Data Feed Switch -->
+                <div class="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-lg p-3 mb-4 shadow-xs">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                            </span>
+                            <div>
+                                <span class="text-xs font-bold text-emerald-950 uppercase tracking-wider block">Live AGMARKNET Feed</span>
+                                <span class="text-[10px] text-emerald-700 font-medium">Pan-India Daily Mandi Rates</span>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer" title="Toggle Live AGMARKNET Daily Prices">
+                            <input type="checkbox" id="live-data-toggle" checked class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                        </label>
+                    </div>
+                </div>
                 
                 <form id="search-form" class="space-y-4">
                     <!-- Commodity -->
@@ -237,14 +259,22 @@
                     </div>
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
                         <div class="mb-4 md:mb-0">
-                            <div class="flex items-center mb-1">
-                                <span class="bg-brand-accent text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide mr-2">#1 Recommended</span>
+                            <div class="flex items-center mb-1 flex-wrap gap-2">
+                                <span class="bg-brand-accent text-white text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">#1 Recommended</span>
+                                <span id="top-live-badge" class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded flex items-center shadow-xs">
+                                    <i class="fa-solid fa-tower-broadcast mr-1 animate-pulse"></i> AGMARKNET LIVE
+                                </span>
                                 <span class="bg-white text-brand text-xs font-bold px-2 py-1 rounded flex items-center">
                                     <i class="fa-solid fa-arrow-trend-up mr-1"></i> Rising
                                 </span>
                             </div>
                             <h2 class="text-3xl font-bold mb-1" id="top-mandi-name">Azadpur Mandi, Delhi</h2>
                             <p class="text-green-50"><i class="fa-solid fa-location-dot mr-1"></i> <span id="top-mandi-dist">Delhi</span> • <span id="top-mandi-dist-km">45</span> km away</p>
+                            <div id="top-live-meta" class="text-xs text-green-100 mt-2 flex items-center gap-3 flex-wrap">
+                                <span><i class="fa-solid fa-calendar-day mr-1"></i>Arrival: <span id="top-live-date" class="font-semibold text-white">Today</span></span>
+                                <span><i class="fa-solid fa-tags mr-1"></i>Price: <span id="top-live-price" class="font-bold text-yellow-300">₹--</span>/Qtl</span>
+                                <span id="top-live-range" class="opacity-90 font-mono">(Range: ₹-- - ₹--)</span>
+                            </div>
                         </div>
                         <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center md:text-right border border-white border-opacity-30 backdrop-blur-sm">
                             <p class="text-sm font-medium text-green-50 mb-1">Estimated Net Return</p>

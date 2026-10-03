@@ -227,13 +227,16 @@ async function handleSearch() {
 
   showLoading();
 
+  const useLive = document.getElementById('live-data-toggle') ? document.getElementById('live-data-toggle').checked : true;
+
   const params = {
     commodity_id: commodityId,
     farmer_lat: lat,
     farmer_lng: lng,
     quantity_quintals: quantity,
     transport_rate_per_km_per_qtl: AppState.transportRate,
-    custom_transport_cost: AppState.customTransportCost
+    custom_transport_cost: AppState.customTransportCost,
+    use_live_data: useLive
   };
 
   const response = await ApiService.fetchRanking(params);
@@ -287,6 +290,30 @@ function displayTopRecommendation(rankings) {
   const deductionsEl = document.getElementById('top-mandi-deductions');
   if (deductionsEl) deductionsEl.textContent = formatIndianCurrency(top.transport_cost + top.commission);
 
+  // Update Live elements
+  const liveBadge = document.getElementById('top-live-badge');
+  const liveDate = document.getElementById('top-live-date');
+  const livePrice = document.getElementById('top-live-price');
+  const liveRange = document.getElementById('top-live-range');
+
+  if (top.is_live) {
+    if (liveBadge) liveBadge.classList.remove('hidden');
+    if (liveDate) liveDate.textContent = top.live_arrival_date || 'Today';
+    if (livePrice) livePrice.textContent = `₹${formatIndianCurrency(top.latest_price)}`;
+    if (liveRange) {
+      if (top.live_min_price && top.live_max_price) {
+        liveRange.textContent = `(Day Range: ₹${formatIndianCurrency(top.live_min_price)} - ₹${formatIndianCurrency(top.live_max_price)})`;
+      } else {
+        liveRange.textContent = '';
+      }
+    }
+  } else {
+    if (liveBadge) liveBadge.classList.add('hidden');
+    if (liveDate) liveDate.textContent = 'Benchmark Model';
+    if (livePrice) livePrice.textContent = `₹${formatIndianCurrency(top.latest_price)}`;
+    if (liveRange) liveRange.textContent = '';
+  }
+
   // Update the trend badge in the header
   const trendBadgeSpan = document.querySelector('#top-recommendation .bg-white.text-brand');
   if (trendBadgeSpan) {
@@ -315,7 +342,8 @@ function displayTopRecommendation(rankings) {
           const diffPct = ((diff / Math.abs(second.net_return)) * 100).toFixed(1);
           advantageText = ` You save <strong>₹${formatIndianCurrency(diff)} (${diffPct}%)</strong> compared to the next best option (${second.name}).`;
       }
-      rationaleDiv.innerHTML = `${top.explanation || ''} Price of <strong>₹${formatIndianCurrency(top.latest_price)}/Qtl</strong> with transport cost of ₹<span id="top-rationale-transport">${formatIndianCurrency(top.transport_cost)}</span> and commission of ₹<span id="top-rationale-comm">${formatIndianCurrency(top.commission)}</span>.${advantageText}`;
+      const liveNote = top.is_live ? `<span class="text-yellow-300 font-semibold"> [Verified Live AGMARKNET Rate: ₹${formatIndianCurrency(top.latest_price)}/Qtl on ${top.live_arrival_date || 'today'}]</span>` : '';
+      rationaleDiv.innerHTML = `${top.explanation || ''}${liveNote} Calculated with transport cost of ₹<span id="top-rationale-transport">${formatIndianCurrency(top.transport_cost)}</span> and commission of ₹<span id="top-rationale-comm">${formatIndianCurrency(top.commission)}</span>.${advantageText}`;
   }
 
   // Show results and hide empty state
@@ -352,15 +380,24 @@ function displayRankingTable(rankings) {
 
     const returnClass = market.net_return > 0 ? 'text-green-700 font-bold' : 'text-red-600 font-bold';
 
+    // Live tag & range
+    const isLive = market.is_live;
+    const liveTag = isLive 
+      ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1.5 shadow-xs" title="Verified daily rate from AGMARKNET / Data.gov.in"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1 animate-pulse"></span>LIVE</span>` 
+      : '';
+    const dayRange = (isLive && market.live_min_price && market.live_max_price) 
+      ? `<div class="text-[10px] text-gray-500 font-mono">Range: ₹${formatIndianCurrency(market.live_min_price)} - ₹${formatIndianCurrency(market.live_max_price)}</div>` 
+      : `<div class="text-[10px] text-gray-400">Benchmark Model</div>`;
+
     tr.innerHTML = `
       <td class="px-3 py-3 text-center">${rankHtml}</td>
       <td class="px-3 py-3">
-        <div class="font-semibold text-gray-800">${market.name}</div>
-        <div class="text-xs text-gray-500">${market.district}, ${market.state}</div>
+        <div class="font-semibold text-gray-800 flex items-center">${market.name} ${liveTag}</div>
+        <div class="text-xs text-gray-500">${market.district}, ${market.state} ${isLive ? `• <span class="text-emerald-700 font-medium">${market.live_variety || 'FAQ'}</span>` : ''}</div>
       </td>
       <td class="px-3 py-3 text-right">
-        ₹${formatIndianCurrency(market.latest_price)}
-        ${trendIcon}
+        <div class="font-bold text-gray-900">₹${formatIndianCurrency(market.latest_price)} ${trendIcon}</div>
+        ${dayRange}
       </td>
       <td class="px-3 py-3 text-right">₹${formatIndianCurrency(market.transport_cost)}<br><span class="text-xs text-gray-400">(${market.distance_km.toFixed(1)} km)</span></td>
       <td class="px-3 py-3 text-right">₹${formatIndianCurrency(market.commission)}</td>
@@ -697,13 +734,15 @@ const debouncedWhatIfChange = debounce(async () => {
 
     const qty = document.getElementById('wi-qty-slider')?.value || AppState.quantity;
     const rate = document.getElementById('wi-trans-slider')?.value || AppState.transportRate;
+    const useLive = document.getElementById('live-data-toggle') ? document.getElementById('live-data-toggle').checked : true;
 
     const params = {
         commodity_id: AppState.selectedCommodity,
         farmer_lat: AppState.farmerLat,
         farmer_lng: AppState.farmerLng,
         quantity_quintals: parseFloat(qty),
-        transport_rate_per_km_per_qtl: parseFloat(rate)
+        transport_rate_per_km_per_qtl: parseFloat(rate),
+        use_live_data: useLive
     };
 
     const response = await ApiService.fetchRanking(params);
@@ -748,14 +787,30 @@ async function showMarketDetail(marketId) {
         }
     }
 
-    // Commodities traded list
+    // Commodities traded list with live AGMARKNET highlight
     const commoditiesEl = document.getElementById('modal-commodities');
-    if (commoditiesEl && market.commodities_traded) {
-        commoditiesEl.innerHTML = market.commodities_traded.map(c => `
-            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded border border-green-200">
-                ${c.commodity_name} (₹${formatIndianCurrency(c.latest_price)})
-            </span>
-        `).join('');
+    if (commoditiesEl) {
+        let html = '';
+        if (market.live_commodities_traded && market.live_commodities_traded.length > 0) {
+            html += `<div class="w-full mb-2"><span class="text-xs font-bold text-red-700 uppercase tracking-wider flex items-center"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse mr-1.5"></span> Live Auction Rates Today (AGMARKNET):</span></div><div class="w-full flex flex-wrap gap-1.5 mb-3">`;
+            html += market.live_commodities_traded.map(c => `
+                <span class="bg-red-50 text-red-900 text-xs px-2.5 py-1 rounded border border-red-200 font-semibold shadow-2xs">
+                    ${c.commodity_name}: <strong class="text-red-700 font-bold">₹${formatIndianCurrency(c.latest_price)}</strong>/Qtl
+                    <span class="text-[10px] text-gray-500 font-normal font-mono">(${c.variety || 'FAQ'})</span>
+                </span>
+            `).join('');
+            html += `</div>`;
+        }
+        if (market.commodities_traded && market.commodities_traded.length > 0) {
+            html += `<div class="w-full mt-2 mb-1"><span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">All Mandi Commodities (Historical):</span></div><div class="w-full flex flex-wrap gap-1.5">`;
+            html += market.commodities_traded.map(c => `
+                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded border border-green-200">
+                    ${c.commodity_name} (₹${formatIndianCurrency(c.latest_price)})
+                </span>
+            `).join('');
+            html += `</div>`;
+        }
+        commoditiesEl.innerHTML = html;
     }
 
     // Show modal
@@ -909,6 +964,15 @@ function setupEventListeners() {
     if(commoditySelect) {
         commoditySelect.addEventListener('change', () => {
             if(searchBtn) searchBtn.disabled = false;
+        });
+    }
+
+    const liveToggle = document.getElementById('live-data-toggle');
+    if(liveToggle) {
+        liveToggle.addEventListener('change', () => {
+            if(AppState.selectedCommodity && AppState.rankings.length > 0) {
+                handleSearch();
+            }
         });
     }
 }

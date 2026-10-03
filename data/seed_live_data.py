@@ -28,6 +28,8 @@ def generate_pan_india_live_data():
         {"name": "Chana (Gram)", "variety": "Desi", "grade": "FAQ", "min_range": (5300, 5550), "modal_range": (5750, 6100), "max_range": (6200, 6600)},
         {"name": "Tur (Arhar)", "variety": "White / Red", "grade": "FAQ", "min_range": (7100, 7600), "modal_range": (7900, 8500), "max_range": (8600, 9200)},
         {"name": "Moong (Green Gram)", "variety": "Shining", "grade": "FAQ", "min_range": (7800, 8200), "modal_range": (8500, 9100), "max_range": (9200, 9700)},
+        {"name": "Urad", "variety": "Black Matpe", "grade": "FAQ", "min_range": (6600, 7100), "modal_range": (7200, 7700), "max_range": (7800, 8300)},
+        {"name": "Sunflower", "variety": "Hybrid", "grade": "FAQ", "min_range": (6200, 6600), "modal_range": (6700, 7200), "max_range": (7300, 7700)},
         {"name": "Maize", "variety": "Yellow", "grade": "FAQ", "min_range": (1950, 2100), "modal_range": (2180, 2350), "max_range": (2400, 2550)},
         {"name": "Bajra", "variety": "Desi", "grade": "FAQ", "min_range": (2100, 2300), "modal_range": (2450, 2650), "max_range": (2700, 2900)},
         {"name": "Jowar", "variety": "White", "grade": "FAQ", "min_range": (2800, 3050), "modal_range": (3200, 3500), "max_range": (3600, 3900)},
@@ -206,8 +208,8 @@ def generate_pan_india_live_data():
     for state, districts in geographies.items():
         for district, markets in districts.items():
             for market in markets:
-                # Each market trades 6 to 14 representative commodities
-                num_comms = random.randint(6, 14)
+                # Each market trades 14 to 22 representative commodities
+                num_comms = random.randint(14, 22)
                 sampled_comms = random.sample(commodities, num_comms)
 
                 for comm in sampled_comms:

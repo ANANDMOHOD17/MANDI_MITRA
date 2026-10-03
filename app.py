@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import sys
-from data.live_data import fetch_live_prices, get_all_states, get_districts, get_commodities_list, refresh_cache
+from data.live_data import fetch_live_prices, get_all_states, get_districts, get_commodities_list, refresh_cache, get_live_data
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -108,18 +108,45 @@ def calculate_trend(prices, days):
     except:
         return 0.0
 
+def find_live_record(m, commodity_name, live_records):
+    if not commodity_name or not live_records:
+        return None
+    c_lower = commodity_name.lower().split()[0]
+    m_name = m.get('name', '').lower()
+    dist = m.get('district', '').lower()
+    st = m.get('state', '').lower()
+
+    # 1. Exact or partial market name + commodity
+    for r in live_records:
+        r_comm = r.get('commodity', '').lower()
+        if c_lower in r_comm or r_comm in c_lower:
+            r_m = r.get('market', '').lower()
+            if m_name in r_m or r_m in m_name:
+                return r
+
+    # 2. District + State match
+    for r in live_records:
+        r_comm = r.get('commodity', '').lower()
+        if c_lower in r_comm or r_comm in c_lower:
+            if r.get('district', '').lower() == dist and r.get('state', '').lower() == st:
+                return r
+    return None
+
 def generate_explanation(rank, market_data):
     name = market_data.get('name', 'This market')
     net_return = market_data.get('net_return', 0)
     trend = market_data.get('trend_label', 'Stable')
     dist = market_data.get('distance_km', 0)
+    is_live = market_data.get('is_live', False)
+    date_str = market_data.get('live_arrival_date')
     
+    live_tag = f" (live AGMARKNET rate on {date_str})" if (is_live and date_str) else ""
     if rank == 1:
-        return f"{name} offers the highest net return of ₹{net_return:,.2f} due to favorable {trend.lower()} prices and optimal transport distance of {dist:.1f} km."
+        return f"{name} offers the highest net return of ₹{net_return:,.2f}{live_tag} due to favorable {trend.lower()} prices and optimal transport distance of {dist:.1f} km."
     elif rank <= 3:
-        return f"{name} is a strong alternative with competitive prices and reasonable logistics costs."
+        return f"{name} is a strong alternative with competitive prices{live_tag} and reasonable logistics costs."
     else:
-        return f"{name} is ranked #{rank} due to a combination of distance and current market rates."
+        return f"{name} is ranked #{rank} due to a combination of distance and current market rates{live_tag}."
 
 
 @app.route('/')
@@ -172,12 +199,23 @@ def get_ranking():
     quantity = data.get('quantity_quintals', 0)
     transport_rate = data.get('transport_rate_per_km_per_qtl', 0)
     custom_transport_cost = data.get('custom_transport_cost')
+    use_live_data = data.get('use_live_data', True)
     
     if not all([commodity_id, farmer_lat is not None, farmer_lng is not None]):
         return jsonify({"error": "Missing required fields"}), 400
         
     # Get commodity info
     commodity = next((c for c in db['commodities'] if c.get('id') == commodity_id), None)
+    comm_name = commodity.get('name', '') if commodity else ''
+    
+    live_records = []
+    if use_live_data:
+        try:
+            live_payload = get_live_data()
+            live_records = live_payload.get('records', [])
+        except Exception as e:
+            print(f"Live data lookup note: {e}")
+            live_records = []
         
     ranked_markets = []
     
@@ -195,6 +233,29 @@ def get_ranking():
         sorted_prices = sorted(prices, key=lambda x: x.get('date', ''), reverse=True)
         latest_price_data = sorted_prices[0]
         latest_price = latest_price_data.get('modal_price', 0)
+        
+        # Check for live real-time price match
+        live_match = find_live_record(m, comm_name, live_records) if use_live_data else None
+        is_live = False
+        live_arrival_date = None
+        live_min_price = None
+        live_max_price = None
+        live_variety = None
+        live_grade = None
+        
+        if live_match:
+            try:
+                live_p = float(live_match.get('modal_price', 0) or 0)
+                if live_p > 0:
+                    latest_price = live_p
+                    is_live = True
+                    live_arrival_date = live_match.get('arrival_date')
+                    live_min_price = float(live_match.get('min_price', 0) or 0)
+                    live_max_price = float(live_match.get('max_price', 0) or 0)
+                    live_variety = live_match.get('variety', 'FAQ')
+                    live_grade = live_match.get('grade', 'FAQ')
+            except Exception:
+                pass
         
         if latest_price <= 0:
             continue
@@ -249,6 +310,13 @@ def get_ranking():
             'lat': m_lat,
             'lng': m_lng,
             'latest_price': latest_price,
+            'is_live': is_live,
+            'live_source': 'AGMARKNET / Data.gov.in' if is_live else 'Benchmark Model',
+            'live_arrival_date': live_arrival_date,
+            'live_min_price': live_min_price,
+            'live_max_price': live_max_price,
+            'live_variety': live_variety,
+            'live_grade': live_grade,
             'price_trend': trend_7d,
             'price_trend_30d': trend_30d,
             'distance_km': dist,
@@ -314,6 +382,29 @@ def get_market_detail(market_id):
         
     detail = market.copy()
     detail['commodities_traded'] = commodities_traded
+
+    # Check live commodities traded today for this market
+    try:
+        live_records = get_live_data().get('records', [])
+        live_traded = []
+        for r in live_records:
+            r_m = r.get('market', '').lower()
+            m_n = market.get('name', '').lower()
+            if m_n in r_m or r_m in m_n or (r.get('district', '').lower() == market.get('district', '').lower() and r.get('state', '').lower() == market.get('state', '').lower()):
+                live_traded.append({
+                    'commodity_name': r.get('commodity'),
+                    'variety': r.get('variety'),
+                    'grade': r.get('grade'),
+                    'latest_price': float(r.get('modal_price', 0) or 0),
+                    'min_price': float(r.get('min_price', 0) or 0),
+                    'max_price': float(r.get('max_price', 0) or 0),
+                    'date': r.get('arrival_date'),
+                    'is_live': True
+                })
+        detail['live_commodities_traded'] = live_traded
+    except Exception:
+        detail['live_commodities_traded'] = []
+
     return jsonify(detail)
 
 @app.route('/api/dashboard-stats', methods=['GET'])
