@@ -69,18 +69,32 @@ function initMap() {
     AtlasState.map = L.map('atlas-map', {
         minZoom: 4,
         maxZoom: 18,
-        zoomControl: false
-    }).setView([22.5, 82.0], 5);
+        zoomControl: false,
+        maxBounds: L.latLngBounds(L.latLng(4.0, 60.0), L.latLng(39.0, 105.0)),
+        maxBoundsViscosity: 0.6
+    }).setView([22.5, 80.0], 5);
 
     L.control.zoom({ position: 'topright' }).addTo(AtlasState.map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+    // Fast, crisp CartoDB Voyager tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
     }).addTo(AtlasState.map);
 
-    const bounds = L.latLngBounds(L.latLng(6.5, 68.0), L.latLng(37.5, 97.5));
-    AtlasState.map.setMaxBounds(bounds);
+    // Ensure map tiles calculate full container size
+    setTimeout(() => {
+        if (AtlasState.map) AtlasState.map.invalidateSize();
+    }, 150);
+    setTimeout(() => {
+        if (AtlasState.map) AtlasState.map.invalidateSize();
+    }, 500);
 }
+
+window.addEventListener('resize', () => {
+    if (AtlasState.map) AtlasState.map.invalidateSize();
+});
 
 async function loadIndiaGeoJSON() {
     try {
@@ -720,7 +734,7 @@ function priceToColor(intensity) {
     const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
     const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
 
-    return \`rgb(\${r}, \${g}, \${b})\`;
+    return `rgb(${r}, ${g}, ${b})`;
 }
 
 function getColor(value, min, max) {
@@ -731,7 +745,7 @@ function getColor(value, min, max) {
 function createMarkerIcon(color, size = 12) {
     return L.divIcon({
         className: 'custom-div-icon',
-        html: \`<div style="background-color: \${color}; width: \${size}px; height: \${size}px; border-radius: 50%; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>\`,
+        html: `<div style="background-color: ${color}; width: ${size}px; height: ${size}px; border-radius: 50%; border: 1.5px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>`,
         iconSize: [size, size],
         iconAnchor: [size/2, size/2]
     });
@@ -767,8 +781,10 @@ function hideAtlasLoading() {
         setTimeout(() => {
             loader.classList.add('hidden');
             loader.classList.remove('flex');
-        }, 250);
+            if (AtlasState.map) AtlasState.map.invalidateSize();
+        }, 200);
     }
+    if (AtlasState.map) AtlasState.map.invalidateSize();
 }
 
 function populateFilters() {

@@ -319,6 +319,18 @@
             closeSidebarBtn.addEventListener('click', () => {
                 sidebar.classList.add('-translate-x-full');
             });
+
+            // Failsafe: if map loader is still visible after 3 seconds, auto-hide it
+            setTimeout(function() {
+                var loader = document.getElementById('atlas-loading');
+                if (loader && !loader.classList.contains('hidden')) {
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    if (window.AtlasState && AtlasState.map) {
+                        AtlasState.map.invalidateSize();
+                    }
+                }
+            }, 3000);
         });
     </script>
 
