@@ -108,8 +108,10 @@ function populateFilterDropdowns() {
 
 function populateCommodityDropdown(categoryFilter = '') {
     const commoditySelect = document.getElementById('filter-commodity');
-    // Clear existing (keep first)
-    commoditySelect.innerHTML = '<option value="">All Commodities</option>';
+    if (!commoditySelect) return;
+    const curVal = commoditySelect.value;
+    const allCommsText = (typeof MandiI18n !== 'undefined') ? MandiI18n.t('reports_filter_commodity') : 'All Commodities';
+    commoditySelect.innerHTML = `<option value="">${allCommsText}</option>`;
     
     const filteredCommodities = categoryFilter 
         ? ReportState.commodities.filter(c => c.category === categoryFilter)
@@ -117,11 +119,18 @@ function populateCommodityDropdown(categoryFilter = '') {
 
     filteredCommodities.forEach(c => {
         const option = document.createElement('option');
-        option.value = c.id || c.name; // Use ID if available, else name
-        option.textContent = c.name;
+        option.value = c.id || c.name;
+        option.textContent = (typeof MandiI18n !== 'undefined') ? MandiI18n.getCommodityName(c.name) : c.name;
         commoditySelect.appendChild(option);
     });
+    if (curVal) commoditySelect.value = curVal;
 }
+
+// Re-populate on language changes
+window.addEventListener('mandiLanguageChanged', () => {
+    const cat = document.getElementById('filter-category')?.value || '';
+    populateCommodityDropdown(cat);
+});
 
 function setupEventListeners() {
     document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);

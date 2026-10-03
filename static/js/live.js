@@ -79,15 +79,33 @@ async function initFilters() {
         
         if (commoditiesRes.ok) {
             const commodities = await commoditiesRes.json();
-            const commSelect = document.getElementById('filter-commodity');
-            commodities.forEach(c => {
-                if (c) commSelect.add(new Option(c, c));
-            });
+            window._liveCommodities = commodities;
+            populateLiveCommodities(commodities);
         }
     } catch (error) {
         console.error('Error loading filters:', error);
     }
 }
+
+function populateLiveCommodities(commodities) {
+    const commSelect = document.getElementById('filter-commodity');
+    if (!commSelect) return;
+    const curVal = commSelect.value;
+    commSelect.innerHTML = '<option value="">All Commodities</option>';
+    commodities.forEach(c => {
+        if (c) {
+            const label = (typeof MandiI18n !== 'undefined') ? MandiI18n.getCommodityName(c) : c;
+            commSelect.add(new Option(label, c));
+        }
+    });
+    if (curVal) commSelect.value = curVal;
+}
+
+window.addEventListener('mandiLanguageChanged', () => {
+    if (window._liveCommodities) {
+        populateLiveCommodities(window._liveCommodities);
+    }
+});
 
 async function loadDistricts(state) {
     const distSelect = document.getElementById('filter-district');

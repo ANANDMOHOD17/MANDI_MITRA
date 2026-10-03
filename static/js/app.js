@@ -148,7 +148,9 @@ function populateCommodityDropdown(commodities) {
   const select = document.getElementById('commodity-select');
   if (!select) return;
 
-  select.innerHTML = '<option value="" disabled selected>Select a commodity...</option>';
+  const currentVal = select.value;
+  const placeholderText = (typeof MandiI18n !== 'undefined') ? MandiI18n.t('select_commodity') : 'Select a commodity...';
+  select.innerHTML = `<option value="" disabled selected>${placeholderText}</option>`;
   
   // Group by category
   const groups = {};
@@ -165,12 +167,17 @@ function populateCommodityDropdown(commodities) {
       const option = document.createElement('option');
       option.value = c.id;
       let mspText = c.msp ? ` (MSP: ₹${c.msp}/Qtl)` : '';
-      option.textContent = `${c.name}${mspText}`;
+      const translatedName = (typeof MandiI18n !== 'undefined') ? MandiI18n.getCommodityName(c.name) : c.name;
+      option.textContent = `${translatedName}${mspText}`;
       optgroup.appendChild(option);
     });
     
     select.appendChild(optgroup);
   });
+
+  if (currentVal) {
+    select.value = currentVal;
+  }
 }
 
 function populateStateDropdown(states) {
@@ -385,9 +392,12 @@ function displayRankingTable(rankings) {
     const liveTag = isLive 
       ? `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-1.5 shadow-xs" title="Verified daily rate from AGMARKNET / Data.gov.in"><span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1 animate-pulse"></span>LIVE</span>` 
       : '';
+    const benchmarkText = (typeof MandiI18n !== 'undefined') ? MandiI18n.t('benchmark_model') : 'Benchmark Model';
     const dayRange = (isLive && market.live_min_price && market.live_max_price) 
       ? `<div class="text-[10px] text-gray-500 font-mono">Range: ₹${formatIndianCurrency(market.live_min_price)} - ₹${formatIndianCurrency(market.live_max_price)}</div>` 
-      : `<div class="text-[10px] text-gray-400">Benchmark Model</div>`;
+      : `<div class="text-[10px] text-gray-400">${benchmarkText}</div>`;
+
+    const detailsText = (typeof MandiI18n !== 'undefined') ? MandiI18n.t('details_btn') : 'Details';
 
     tr.innerHTML = `
       <td class="px-3 py-3 text-center">${rankHtml}</td>
@@ -405,7 +415,7 @@ function displayRankingTable(rankings) {
       <td class="px-3 py-3 text-center"><span class="px-2 py-1 rounded-full text-xs font-medium ${trendClass}">${trend > 0 ? '+' : ''}${trend}%</span></td>
       <td class="px-3 py-3 text-center">
         <button class="text-emerald-600 hover:text-emerald-800 text-sm font-medium" onclick="showMarketDetail('${market.id}')">
-          <i class="fas fa-chart-line"></i> Details
+          <i class="fas fa-chart-line"></i> ${detailsText}
         </button>
       </td>
     `;
@@ -975,6 +985,17 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Re-render when language changes
+    window.addEventListener('mandiLanguageChanged', (e) => {
+        if (AppState.commodities && AppState.commodities.length > 0) {
+            populateCommodityDropdown(AppState.commodities);
+        }
+        if (AppState.rankings && AppState.rankings.length > 0) {
+            displayTopRecommendation(AppState.rankings);
+            displayRankingTable(AppState.rankings);
+        }
+    });
 }
 
 // Boot up

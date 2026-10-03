@@ -60,19 +60,19 @@
             </a>
             <nav class="hidden md:flex items-center space-x-1">
                 <a href="/" class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
-                    <i class="fa-solid fa-chart-line mr-1"></i> Price Advisor
+                    <i class="fa-solid fa-chart-line mr-1"></i> <span data-i18n="nav_advisor">Price Advisor</span>
                 </a>
                 <a href="/atlas" class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
-                    <i class="fa-solid fa-map-location-dot mr-1"></i> Market Atlas
+                    <i class="fa-solid fa-map-location-dot mr-1"></i> <span data-i18n="nav_atlas">Market Atlas</span>
                 </a>
                 <a href="/reports" class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
-                    <i class="fa-solid fa-table-list mr-1"></i> Reports
+                    <i class="fa-solid fa-table-list mr-1"></i> <span data-i18n="nav_reports">Reports</span>
                 </a>
                 <a href="/live" class="px-4 py-2 rounded-lg bg-white bg-opacity-20 font-semibold text-white transition-all">
-                    <i class="fa-solid fa-tower-broadcast mr-1 text-red-400"></i> Live Prices
+                    <i class="fa-solid fa-tower-broadcast mr-1 text-red-400"></i> <span data-i18n="nav_live">Live Prices</span>
                 </a>
                 <a href="/intro" class="px-3.5 py-2 rounded-lg bg-amber-400 bg-opacity-20 hover:bg-opacity-30 font-semibold text-amber-200 hover:text-white transition-all border border-amber-300 border-opacity-30">
-                    <i class="fa-solid fa-film mr-1 text-amber-300"></i> Intro Tour
+                    <i class="fa-solid fa-film mr-1 text-amber-300"></i> <span data-i18n="nav_intro">Intro Tour</span>
                 </a>
             </nav>
             <button id="mobile-menu-btn" class="md:hidden text-white text-2xl" onclick="document.getElementById('mobile-nav').classList.toggle('hidden')">
@@ -80,11 +80,11 @@
             </button>
         </div>
         <div id="mobile-nav" class="hidden md:hidden border-t border-green-600 bg-brand-dark">
-            <a href="/" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-chart-line mr-2"></i>Price Advisor</a>
-            <a href="/atlas" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-map-location-dot mr-2"></i>Market Atlas</a>
-            <a href="/reports" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-table-list mr-2"></i>Reports</a>
-            <a href="/live" class="block px-4 py-3 bg-white bg-opacity-10 font-semibold text-white"><i class="fa-solid fa-tower-broadcast mr-2 text-red-400"></i>Live Prices</a>
-            <a href="/intro" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-amber-300 font-semibold"><i class="fa-solid fa-film mr-2"></i>Intro Tour</a>
+            <a href="/" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-chart-line mr-2"></i><span data-i18n="nav_advisor">Price Advisor</span></a>
+            <a href="/atlas" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-map-location-dot mr-2"></i><span data-i18n="nav_atlas">Market Atlas</span></a>
+            <a href="/reports" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-table-list mr-2"></i><span data-i18n="nav_reports">Reports</span></a>
+            <a href="/live" class="block px-4 py-3 bg-white bg-opacity-10 font-semibold text-white"><i class="fa-solid fa-tower-broadcast mr-2 text-red-400"></i><span data-i18n="nav_live">Live Prices</span></a>
+            <a href="/intro" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-amber-300 font-semibold"><i class="fa-solid fa-film mr-2"></i><span data-i18n="nav_intro">Intro Tour</span></a>
         </div>
     </header>
 
@@ -201,6 +201,7 @@
         </div>
     </footer>
 
+    <script src="/static/js/i18n.js"></script>
     <script src="/static/js/live.js"></script>
 </body>
 </html>

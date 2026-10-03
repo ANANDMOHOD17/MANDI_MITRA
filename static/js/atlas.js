@@ -792,7 +792,9 @@ function populateFilters() {
     const stateSelect = document.getElementById('atlas-state-filter');
 
     if (commSelect) {
-        commSelect.innerHTML = '<option value="">All Commodities</option>';
+        const curComm = commSelect.value;
+        const allCommsText = (typeof MandiI18n !== 'undefined') ? MandiI18n.t('atlas_all_crops') : 'All Commodities';
+        commSelect.innerHTML = `<option value="">${allCommsText}</option>`;
         const byCat = {};
         AtlasState.commodities.forEach(c => {
             if (!byCat[c.category]) byCat[c.category] = [];
@@ -805,24 +807,29 @@ function populateFilters() {
             comms.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
-                opt.textContent = c.name;
+                opt.textContent = (typeof MandiI18n !== 'undefined') ? MandiI18n.getCommodityName(c.name) : c.name;
                 optgroup.appendChild(opt);
             });
             commSelect.appendChild(optgroup);
         }
+        if (curComm) commSelect.value = curComm;
     }
 
     if (stateSelect) {
-        stateSelect.innerHTML = '<option value="">All States</option>';
+        const curState = stateSelect.value;
+        const allStatesText = (typeof MandiI18n !== 'undefined') ? MandiI18n.t('atlas_all_states') : 'All States';
+        stateSelect.innerHTML = `<option value="">${allStatesText}</option>`;
         AtlasState.states.sort().forEach(s => {
             const opt = document.createElement('option');
             opt.value = s;
             opt.textContent = s;
             stateSelect.appendChild(opt);
         });
+        if (curState) stateSelect.value = curState;
     }
 
     if (catSelect) {
+        const curCat = catSelect.value;
         const cats = [...new Set(AtlasState.commodities.map(c => c.category))].sort();
         catSelect.innerHTML = '<option value="">All Categories</option>';
         cats.forEach(c => {
@@ -831,6 +838,7 @@ function populateFilters() {
             opt.textContent = c;
             catSelect.appendChild(opt);
         });
+        if (curCat) catSelect.value = curCat;
     }
 }
 
@@ -937,4 +945,8 @@ function setupEventListeners() {
             if (dashboard) dashboard.classList.add('hidden');
         });
     }
+
+    window.addEventListener('mandiLanguageChanged', () => {
+        populateFilters();
+    });
 }
