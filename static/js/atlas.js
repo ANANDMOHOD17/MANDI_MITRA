@@ -76,10 +76,9 @@ function initMap() {
 
     L.control.zoom({ position: 'topright' }).addTo(AtlasState.map);
 
-    // Fast, crisp CartoDB Voyager tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
+    // 100% Free OpenStreetMap Tile Layer (No API Key Required)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
     }).addTo(AtlasState.map);
 
