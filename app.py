@@ -7,6 +7,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import sys
 from data.live_data import fetch_live_prices, get_all_states, get_districts, get_commodities_list, refresh_cache, get_live_data
+from data.chatbot import answer_query
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -960,6 +961,15 @@ def force_refresh_live_data():
     if success:
         return jsonify({'status': 'success', 'source': 'live'})
     return jsonify({'status': 'cached', 'source': 'cache', 'message': 'Loaded from verified local cache (data.gov.in unreachable or key invalid)'})
+
+@app.route('/api/chat', methods=['POST'])
+def chat_endpoint():
+    req_data = request.get_json(silent=True) or {}
+    message = req_data.get('message', '').strip()
+    language = req_data.get('language', 'en')
+    
+    result = answer_query(message, language=language, db=db, live_data_func=fetch_live_prices)
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
