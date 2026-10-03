@@ -26,35 +26,50 @@ async function initAtlas() {
         initMap();
         setupEventListeners();
 
-        const [commoditiesRes, statesRes, marketsRes] = await Promise.all([
-            fetch('/api/commodities'),
-            fetch('/api/states'),
-            fetch('/api/atlas/markets')
-        ]);
+        // 1. Fast unified init API for instant first-paint (<100ms)
+        const initRes = await fetch('/api/atlas/init').catch(() => null);
+        if (initRes && initRes.ok) {
+            const data = await initRes.json();
+            AtlasState.commodities = data.commodities || [];
+            AtlasState.states = data.states || [];
+            AtlasState.allMarkets = data.markets || [];
+            AtlasState.stateSummary = data.state_summary || [];
 
-        if (commoditiesRes.ok) AtlasState.commodities = await commoditiesRes.json();
-        if (statesRes.ok) AtlasState.states = await statesRes.json();
-        if (marketsRes.ok) AtlasState.allMarkets = await marketsRes.json();
+            populateFilters();
+            displayStateSummary(AtlasState.stateSummary);
+            displayMarkets(AtlasState.allMarkets);
+        } else {
+            // Fallback if needed
+            const [commoditiesRes, statesRes, marketsRes] = await Promise.all([
+                fetch('/api/commodities').catch(() => null),
+                fetch('/api/states').catch(() => null),
+                fetch('/api/atlas/markets').catch(() => null)
+            ]);
 
-        populateFilters();
-        
-        await loadIndiaGeoJSON();
-        displayMarkets(AtlasState.allMarkets);
-        
-        // Load initial state summary without commodity filter
-        await fetchAndDisplayStateSummary();
+            if (commoditiesRes && commoditiesRes.ok) AtlasState.commodities = await commoditiesRes.json();
+            if (statesRes && statesRes.ok) AtlasState.states = await statesRes.json();
+            if (marketsRes && marketsRes.ok) AtlasState.allMarkets = await marketsRes.json();
+
+            populateFilters();
+            displayMarkets(AtlasState.allMarkets);
+            fetchAndDisplayStateSummary();
+        }
     } catch (error) {
         console.error("Error initializing atlas:", error);
     } finally {
+        // HIDE LOADER IMMEDIATELY! Map and markets are ready for instant user interaction
         hideAtlasLoading();
     }
+
+    // 2. Load GeoJSON in background without blocking map display or user interaction
+    loadIndiaGeoJSON();
 }
 
 function initMap() {
     AtlasState.map = L.map('atlas-map', {
         minZoom: 4,
         maxZoom: 18,
-        zoomControl: false // We will add it manually or position it
+        zoomControl: false
     }).setView([22.5, 82.0], 5);
 
     L.control.zoom({ position: 'topright' }).addTo(AtlasState.map);
@@ -69,12 +84,26 @@ function initMap() {
 
 async function loadIndiaGeoJSON() {
     try {
+        // Check sessionStorage cache for instant 0ms retrieval on repeat visits
+        const cached = sessionStorage.getItem('india_geojson_cache');
+        if (cached) {
+            AtlasState.indiaGeoJSON = JSON.parse(cached);
+            renderChoropleth();
+            return;
+        }
+
         let response = await fetch('/static/data/india-states.geojson').catch(() => null);
         if (!response || !response.ok) {
             response = await fetch('https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson').catch(() => null);
         }
         if (response && response.ok) {
-            AtlasState.indiaGeoJSON = await response.json();
+            const gjText = await response.text();
+            AtlasState.indiaGeoJSON = JSON.parse(gjText);
+            try {
+                sessionStorage.setItem('india_geojson_cache', gjText);
+            } catch (storageErr) {
+                // Ignore if storage quota is constrained
+            }
             renderChoropleth();
         } else {
             console.warn("Failed to load India GeoJSON");
@@ -725,16 +754,20 @@ function matchStateName(properties) {
 function showAtlasLoading() {
     const loader = document.getElementById('atlas-loading') || document.getElementById('atlas-loader');
     if (loader) {
-        loader.classList.remove('hidden');
-        loader.classList.add('flex');
+        loader.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        loader.classList.add('flex', 'opacity-100');
     }
 }
 
 function hideAtlasLoading() {
     const loader = document.getElementById('atlas-loading') || document.getElementById('atlas-loader');
     if (loader) {
-        loader.classList.add('hidden');
-        loader.classList.remove('flex');
+        loader.classList.remove('opacity-100');
+        loader.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            loader.classList.remove('flex');
+        }, 250);
     }
 }
 

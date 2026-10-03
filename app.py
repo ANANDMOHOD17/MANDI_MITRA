@@ -375,17 +375,14 @@ def market_redirect(market_id):
     from flask import redirect
     return redirect(f'/?market={market_id}')
 
-@app.route('/api/atlas/markets')
-def get_atlas_markets():
+def compute_atlas_markets():
     result = []
-    
     market_prices = {}
     for p in db['prices']:
         mid = p['market_id']
         cid = p['commodity_id']
         if mid not in market_prices:
             market_prices[mid] = {}
-        
         if cid not in market_prices[mid] or p['date'] > market_prices[mid][cid]['date']:
             market_prices[mid][cid] = p
             
@@ -395,11 +392,9 @@ def get_atlas_markets():
             continue
             
         m_prices = list(market_prices[mid].values())
-        
         commodities_count = len(m_prices)
         total_arrivals = sum(p.get('arrivals_tonnes', 0) for p in m_prices)
         avg_price = sum(p.get('modal_price', 0) for p in m_prices) / commodities_count if commodities_count > 0 else 0
-        
         sorted_m_prices = sorted(m_prices, key=lambda x: x.get('modal_price', 0), reverse=True)
         top_5 = sorted_m_prices[:5]
         
@@ -408,7 +403,6 @@ def get_atlas_markets():
             cname = next((c.get('name') for c in db['commodities'] if c.get('id') == p['commodity_id']), p['commodity_id'])
             p_history = get_prices_for_market_commodity(mid, p['commodity_id'])
             trend_7d = calculate_trend(p_history, 7)
-            
             top_commodities.append({
                 'commodity_id': p['commodity_id'],
                 'commodity_name': cname,
@@ -425,8 +419,86 @@ def get_atlas_markets():
             'avg_price': avg_price
         })
         result.append(market_data)
+    return result
+
+def compute_atlas_state_summary(commodity_id=None):
+    if commodity_id:
+        c_prices = [p for p in db['prices'] if p.get('commodity_id') == commodity_id]
+    else:
+        c_prices = db['prices']
         
-    return jsonify(result)
+    if not c_prices:
+        return []
+        
+    latest_date = max(p['date'] for p in c_prices)
+    latest_prices = [p for p in c_prices if p['date'] == latest_date]
+    
+    state_data = {}
+    for p in latest_prices:
+        mid = p['market_id']
+        market = next((m for m in db['markets'] if m['id'] == mid), None)
+        if not market: continue
+        state = market.get('state')
+        if not state: continue
+        
+        if state not in state_data:
+            state_data[state] = {
+                'prices': [],
+                'markets': set(),
+                'market_names': set()
+            }
+        state_data[state]['prices'].append(p)
+        state_data[state]['markets'].add(mid)
+        state_data[state]['market_names'].add(market.get('name'))
+        
+    result = []
+    for state, data in state_data.items():
+        prices = data['prices']
+        total_arrivals = sum(p.get('arrivals_tonnes', 0) for p in prices)
+        avg_modal = sum(p.get('modal_price', 0) for p in prices) / len(prices)
+        min_price = min(p.get('min_price', p.get('modal_price', 0)) for p in prices)
+        max_price = max(p.get('max_price', p.get('modal_price', 0)) for p in prices)
+        
+        top_c = max(prices, key=lambda x: x.get('modal_price', 0))
+        cname = next((c.get('name') for c in db['commodities'] if c.get('id') == top_c['commodity_id']), top_c['commodity_id'])
+        
+        trend_sum = 0
+        for p in prices:
+            p_history = get_prices_for_market_commodity(p['market_id'], p['commodity_id'])
+            trend_sum += calculate_trend(p_history, 7)
+        trend_7d = trend_sum / len(prices) if len(prices) > 0 else 0
+        
+        result.append({
+            'state': state,
+            'mandi_count': len(data['markets']),
+            'avg_modal_price': avg_modal,
+            'min_price': min_price,
+            'max_price': max_price,
+            'total_arrivals': total_arrivals,
+            'top_commodity': cname,
+            'top_commodity_price': top_c.get('modal_price', 0),
+            'trend_7d': trend_7d,
+            'market_names': list(data['market_names'])
+        })
+    return result
+
+# Initialize caches once data is loaded
+db['states'] = sorted(list(set([m.get('state') for m in db['markets'] if m.get('state')])))
+db['atlas_markets_cache'] = compute_atlas_markets()
+db['atlas_state_summary_cache'] = compute_atlas_state_summary()
+
+@app.route('/api/atlas/init')
+def get_atlas_init():
+    return jsonify({
+        'commodities': db['commodities'],
+        'states': db['states'],
+        'markets': db.get('atlas_markets_cache', []),
+        'state_summary': db.get('atlas_state_summary_cache', [])
+    })
+
+@app.route('/api/atlas/markets')
+def get_atlas_markets():
+    return jsonify(db.get('atlas_markets_cache', []))
 
 @app.route('/api/atlas/heatmap')
 def get_atlas_heatmap():
@@ -492,70 +564,9 @@ def get_atlas_heatmap():
 @app.route('/api/atlas/state-summary')
 def get_atlas_state_summary():
     commodity_id = request.args.get('commodity_id')
-    
-    if commodity_id:
-        c_prices = [p for p in db['prices'] if p.get('commodity_id') == commodity_id]
-    else:
-        c_prices = db['prices']
-        
-    if not c_prices:
-        return jsonify([])
-        
-    latest_date = max(p['date'] for p in c_prices)
-    latest_prices = [p for p in c_prices if p['date'] == latest_date]
-    
-    state_data = {}
-    for p in latest_prices:
-        mid = p['market_id']
-        market = next((m for m in db['markets'] if m['id'] == mid), None)
-        if not market: continue
-        
-        state = market.get('state')
-        if not state: continue
-        
-        if state not in state_data:
-            state_data[state] = {
-                'prices': [],
-                'markets': set(),
-                'market_names': set()
-            }
-            
-        state_data[state]['prices'].append(p)
-        state_data[state]['markets'].add(mid)
-        state_data[state]['market_names'].add(market.get('name'))
-        
-    result = []
-    for state, data in state_data.items():
-        prices = data['prices']
-        
-        total_arrivals = sum(p.get('arrivals_tonnes', 0) for p in prices)
-        avg_modal = sum(p.get('modal_price', 0) for p in prices) / len(prices)
-        min_price = min(p.get('min_price', p.get('modal_price', 0)) for p in prices)
-        max_price = max(p.get('max_price', p.get('modal_price', 0)) for p in prices)
-        
-        top_c = max(prices, key=lambda x: x.get('modal_price', 0))
-        cname = next((c.get('name') for c in db['commodities'] if c.get('id') == top_c['commodity_id']), top_c['commodity_id'])
-        
-        trend_sum = 0
-        for p in prices:
-            p_history = get_prices_for_market_commodity(p['market_id'], p['commodity_id'])
-            trend_sum += calculate_trend(p_history, 7)
-        trend_7d = trend_sum / len(prices) if len(prices) > 0 else 0
-        
-        result.append({
-            'state': state,
-            'mandi_count': len(data['markets']),
-            'avg_modal_price': avg_modal,
-            'min_price': min_price,
-            'max_price': max_price,
-            'total_arrivals': total_arrivals,
-            'top_commodity': cname,
-            'top_commodity_price': top_c.get('modal_price', 0),
-            'trend_7d': trend_7d,
-            'market_names': list(data['market_names'])
-        })
-        
-    return jsonify(result)
+    if not commodity_id:
+        return jsonify(db.get('atlas_state_summary_cache', []))
+    return jsonify(compute_atlas_state_summary(commodity_id))
 
 @app.route('/api/atlas/commodity-summary')
 def get_atlas_commodity_summary():
