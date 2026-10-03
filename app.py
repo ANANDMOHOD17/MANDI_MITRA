@@ -153,6 +153,10 @@ def generate_explanation(rank, market_data):
 def index():
     return render_template('index.html')
 
+@app.route('/intro')
+def intro_page():
+    return render_template('intro.html')
+
 @app.route('/api/commodities', methods=['GET'])
 def get_commodities():
     return jsonify(db['commodities'])

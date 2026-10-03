@@ -65,6 +65,18 @@ Then open **http://localhost:5000** in your browser.
 - **Resilient Fallback & Cache Engine**: Local high-speed caching with self-healing bootstrap, retry backoffs, and instant client filtering.
 - **Auto-Refresh Countdown**: Live 5-minute polling ticker with manual refresh option and one-click CSV export.
 
+### 5. 🎬 4-Slide Cinematic Intro Experience (`/intro`)
+- **Visual Storytelling Journey**:
+  1. **Smart** (`smart.jpg`): Modern agritech guidance, drone monitoring, and AI price intelligence.
+  2. **Compare** (`compare.jpg`): Geospatial cross-mandi price disparity analytics.
+  3. **Calculate** (`calculate.jpg`): Precision freight logistics, mileage, and commission deductions.
+  4. **Earn More** (`earn_more.jpg`): Bumper harvest profit realization and explainable recommendations.
+- **Cinematic Features**:
+  - Ken Burns slow-motion zoom & pan effect with glassmorphism overlays.
+  - 4-Segment story progress bar with auto-advance and interactive slide jump tabs.
+  - Play/Pause toggle, keyboard controls (Arrow Left/Right, Space, Escape), and mobile swipe support.
+  - Direct CTA buttons leading seamlessly into the live Price Advisor platform.
+
 ---
 
 ## 📊 Agricultural Dataset (Mirroring AGMARKNET & eNAM)

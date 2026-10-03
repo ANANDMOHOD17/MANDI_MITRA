@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART MANDI — 4-Slide Cinematic Intro | Smart Mandi Price Advisor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#10B981',
+                            DEFAULT: '#059669',
+                            dark: '#047857',
+                            accent: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap');
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        /* Ken Burns Cinematic Zoom Effect */
+        @keyframes kenBurns {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08) translate(-1%, -1%); }
+            100% { transform: scale(1.12); }
+        }
+
+        .slide-bg {
+            animation: kenBurns 16s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-pill {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Text glow */
+        .glow-title {
+            text-shadow: 0 0 35px rgba(16, 185, 129, 0.45);
+        }
+
+        .progress-segment {
+            transition: width 0.1s linear;
+        }
+
+        /* Fade transitions */
+        .slide-container {
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen relative select-none">
+
+    <!-- SLIDES CONTAINER -->
+    <div id="slides-wrapper" class="absolute inset-0">
+
+        <!-- SLIDE 1: SMART -->
+        <div class="slide-container absolute inset-0 opacity-100 z-10" data-slide="0">
+            <div class="absolute inset-0 bg-cover bg-center slide-bg" style="background-image: url('/static/images/smart.jpg');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+            
+            <div class="relative z-20 h-full flex flex-col justify-end pb-24 md:pb-28 px-6 md:px-16 lg:px-24 max-w-4xl">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="glass-pill px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center">
+                        <i class="fa-solid fa-microchip mr-1.5"></i> Step 01 / Phase 01
+                    </span>
+                    <span class="text-xs text-gray-300 font-medium">Smart AI Decision Engine</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight glow-title leading-tight mb-2">
+                    <span class="text-white">SMART</span>
+                    <span class="text-emerald-400 block text-3xl md:text-4xl font-semibold mt-1">स्मार्ट निर्णय, सटीक जानकारी</span>
+                </h1>
+                <p class="text-base md:text-xl text-gray-200 mb-6 font-light leading-relaxed max-w-2xl">
+                    Discover real-time market prices across 1,400+ mandis in India. AI-powered intelligence connects smallholder farmers to live AGMARKNET auction feeds, variety benchmarks, and regional supply insights.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-emerald-300"><i class="fa-solid fa-satellite-dish mr-1.5 text-emerald-400"></i>Live AGMARKNET API</span>
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-emerald-300"><i class="fa-solid fa-wheat-awn mr-1.5 text-emerald-400"></i>30+ Commodities</span>
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-emerald-300"><i class="fa-solid fa-building-columns mr-1.5 text-emerald-400"></i>Govt MSP Benchmarks</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: COMPARE -->
+        <div class="slide-container absolute inset-0 opacity-0 z-0 pointer-events-none" data-slide="1">
+            <div class="absolute inset-0 bg-cover bg-center slide-bg" style="background-image: url('/static/images/compare.jpg');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+            
+            <div class="relative z-20 h-full flex flex-col justify-end pb-24 md:pb-28 px-6 md:px-16 lg:px-24 max-w-4xl">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="glass-pill px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center">
+                        <i class="fa-solid fa-scale-balanced mr-1.5"></i> Step 02 / Phase 02
+                    </span>
+                    <span class="text-xs text-gray-300 font-medium">Pan-India Geographic Comparison</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight glow-title leading-tight mb-2">
+                    <span class="text-white">COMPARE</span>
+                    <span class="text-blue-400 block text-3xl md:text-4xl font-semibold mt-1">मंडियों की विस्तृत तुलना</span>
+                </h1>
+                <p class="text-base md:text-xl text-gray-200 mb-6 font-light leading-relaxed max-w-2xl">
+                    Compare modal, minimum, and maximum prices across nearby local mandis and major national terminal markets. Understand regional price disparities before loading your produce on a truck.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-blue-300"><i class="fa-solid fa-map-location-dot mr-1.5 text-blue-400"></i>National Market Atlas</span>
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-blue-300"><i class="fa-solid fa-chart-simple mr-1.5 text-blue-400"></i>Price Spread Heatmaps</span>
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-blue-300"><i class="fa-solid fa-arrows-split-up-and-left mr-1.5 text-blue-400"></i>50+ APMC Mandis</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: CALCULATE -->
+        <div class="slide-container absolute inset-0 opacity-0 z-0 pointer-events-none" data-slide="2">
+            <div class="absolute inset-0 bg-cover bg-center slide-bg" style="background-image: url('/static/images/calculate.jpg');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+            
+            <div class="relative z-20 h-full flex flex-col justify-end pb-24 md:pb-28 px-6 md:px-16 lg:px-24 max-w-4xl">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="glass-pill px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center">
+                        <i class="fa-solid fa-calculator mr-1.5"></i> Step 03 / Phase 03
+                    </span>
+                    <span class="text-xs text-gray-300 font-medium">Logistics & Net Return Math</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight glow-title leading-tight mb-2">
+                    <span class="text-white">CALCULATE</span>
+                    <span class="text-amber-400 block text-3xl md:text-4xl font-semibold mt-1">सटीक लागत और वास्तविक मुनाफा</span>
+                </h1>
+                <p class="text-base md:text-xl text-gray-200 mb-6 font-light leading-relaxed max-w-2xl">
+                    High market prices can be deceptive. Our Haversine logistics engine automatically deducts diesel, vehicle freight, mileage, and mandi commission fees to reveal your true net profit.
+                </p>
+                <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-amber-300"><i class="fa-solid fa-truck-fast mr-1.5 text-amber-400"></i>Transport Cost Estimator</span>
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-amber-300"><i class="fa-solid fa-percent mr-1.5 text-amber-400"></i>Mandi Commission Math</span>
+                    <span class="glass-pill px-3 py-1.5 rounded-lg text-amber-300"><i class="fa-solid fa-sliders mr-1.5 text-amber-400"></i>What-If Sensitivity Sliders</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: EARN MORE -->
+        <div class="slide-container absolute inset-0 opacity-0 z-0 pointer-events-none" data-slide="3">
+            <div class="absolute inset-0 bg-cover bg-center slide-bg" style="background-image: url('/static/images/earn_more.jpg');"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/30"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
+            
+            <div class="relative z-20 h-full flex flex-col justify-end pb-24 md:pb-28 px-6 md:px-16 lg:px-24 max-w-4xl">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="glass-pill px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-green-400 flex items-center">
+                        <i class="fa-solid fa-sack-dollar mr-1.5"></i> Step 04 / Final Outcome
+                    </span>
+                    <span class="text-xs text-gray-300 font-medium">Empower Your Harvest</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight glow-title leading-tight mb-2">
+                    <span class="text-white">EARN MORE</span>
+                    <span class="text-green-400 block text-3xl md:text-4xl font-semibold mt-1">हर फसल पर अधिकतम कमाई</span>
+                </h1>
+                <p class="text-base md:text-xl text-gray-200 mb-6 font-light leading-relaxed max-w-2xl">
+                    Farmers earn up to 15–25% higher net returns per trolley by making informed selling decisions. Ranked recommendations with explainable AI reasoning guide you to the exact winning mandi.
+                </p>
+                <div class="flex flex-wrap gap-3 items-center pt-2">
+                    <a href="/" class="bg-gradient-to-r from-brand to-emerald-500 hover:from-brand-dark hover:to-emerald-600 text-white font-bold px-7 py-3.5 rounded-xl shadow-lg shadow-emerald-900/50 flex items-center text-base md:text-lg transition-transform transform hover:scale-105">
+                        <i class="fa-solid fa-rocket mr-2"></i> Launch Smart Mandi
+                    </a>
+                    <a href="/atlas" class="glass-pill hover:bg-white/20 text-white font-medium px-5 py-3.5 rounded-xl text-sm md:text-base transition-colors flex items-center">
+                        <i class="fa-solid fa-map-location-dot mr-2 text-emerald-400"></i> Open Market Atlas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOP HEADER / NAV BAR -->
+    <header class="absolute top-0 left-0 right-0 z-40 p-4 md:p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+        <a href="/" class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-900/40">
+                <i class="fa-solid fa-wheat-awn text-white text-xl"></i>
+            </div>
+            <div>
+                <h2 class="text-lg md:text-xl font-bold tracking-tight text-white leading-tight">SMART MANDI</h2>
+                <p class="text-[11px] text-emerald-300 font-medium tracking-wide">4-SLIDE CINEMATIC INTRO</p>
+            </div>
+        </a>
+
+        <!-- Top Right Controls -->
+        <div class="flex items-center space-x-3">
+            <button id="btn-toggle-play" class="glass-pill hover:bg-white/20 text-white text-xs md:text-sm px-3.5 py-2 rounded-lg flex items-center transition-colors">
+                <i id="play-pause-icon" class="fa-solid fa-pause mr-1.5"></i> <span id="play-pause-text">Pause</span>
+            </button>
+            <a href="/" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs md:text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition-all flex items-center">
+                Skip to Advisor <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- TOP PROGRESS BARS (4 SEGMENTS) -->
+    <div class="absolute top-20 md:top-24 left-6 right-6 z-40 grid grid-cols-4 gap-2 md:gap-3 max-w-4xl mx-auto">
+        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" onclick="goToSlide(0)">
+            <div id="bar-0" class="h-full bg-emerald-400 rounded-full w-0 progress-segment"></div>
+        </div>
+        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" onclick="goToSlide(1)">
+            <div id="bar-1" class="h-full bg-blue-400 rounded-full w-0 progress-segment"></div>
+        </div>
+        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" onclick="goToSlide(2)">
+            <div id="bar-2" class="h-full bg-amber-400 rounded-full w-0 progress-segment"></div>
+        </div>
+        <div class="h-1.5 bg-white/20 rounded-full overflow-hidden cursor-pointer" onclick="goToSlide(3)">
+            <div id="bar-3" class="h-full bg-green-400 rounded-full w-0 progress-segment"></div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION TABS & CONTROLS -->
+    <nav class="absolute bottom-4 md:bottom-8 left-4 right-4 z-40 flex justify-between items-center max-w-5xl mx-auto">
+        
+        <!-- Previous Button -->
+        <button id="btn-prev-slide" onclick="prevSlide()" class="glass-pill hover:bg-white/20 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-colors">
+            <i class="fa-solid fa-chevron-left text-sm md:text-base"></i>
+        </button>
+
+        <!-- 4 Interactive Tabs -->
+        <div class="flex items-center gap-1.5 md:gap-2 glass-panel px-2.5 py-1.5 md:px-4 md:py-2 rounded-2xl">
+            <button onclick="goToSlide(0)" class="tab-btn px-3 py-1.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-white bg-white/20 shadow-xs" data-target="0">
+                <i class="fa-solid fa-microchip mr-1.5 text-emerald-400"></i>Smart
+            </button>
+            <button onclick="goToSlide(1)" class="tab-btn px-3 py-1.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-gray-400 hover:text-white" data-target="1">
+                <i class="fa-solid fa-scale-balanced mr-1.5 text-blue-400"></i>Compare
+            </button>
+            <button onclick="goToSlide(2)" class="tab-btn px-3 py-1.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-gray-400 hover:text-white" data-target="2">
+                <i class="fa-solid fa-calculator mr-1.5 text-amber-400"></i>Calculate
+            </button>
+            <button onclick="goToSlide(3)" class="tab-btn px-3 py-1.5 rounded-xl text-xs md:text-sm font-semibold transition-all text-gray-400 hover:text-white" data-target="3">
+                <i class="fa-solid fa-sack-dollar mr-1.5 text-green-400"></i>Earn More
+            </button>
+        </div>
+
+        <!-- Next Button -->
+        <button id="btn-next-slide" onclick="nextSlide()" class="glass-pill hover:bg-white/20 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-colors">
+            <i class="fa-solid fa-chevron-right text-sm md:text-base"></i>
+        </button>
+    </nav>
+
+    <!-- SCRIPT FOR CINEMATIC CONTROLS -->
+    <script>
+        const DURATION_PER_SLIDE = 4500; // 4.5 seconds per slide
+        let currentSlide = 0;
+        let isPlaying = true;
+        let progressStart = Date.now();
+        let progressElapsed = 0;
+        let animFrameId = null;
+
+        const slides = document.querySelectorAll('.slide-container');
+        const tabs = document.querySelectorAll('.tab-btn');
+        const progressBars = [
+            document.getElementById('bar-0'),
+            document.getElementById('bar-1'),
+            document.getElementById('bar-2'),
+            document.getElementById('bar-3')
+        ];
+
+        function showSlide(index) {
+            currentSlide = index;
+            slides.forEach((s, idx) => {
+                if (idx === index) {
+                    s.style.opacity = '1';
+                    s.style.zIndex = '10';
+                    s.style.pointerEvents = 'auto';
+                } else {
+                    s.style.opacity = '0';
+                    s.style.zIndex = '0';
+                    s.style.pointerEvents = 'none';
+                }
+            });
+
+            // Update tab styles
+            tabs.forEach((tab, idx) => {
+                if (idx === index) {
+                    tab.classList.add('bg-white/20', 'text-white', 'shadow-xs');
+                    tab.classList.remove('text-gray-400');
+                } else {
+                    tab.classList.remove('bg-white/20', 'text-white', 'shadow-xs');
+                    tab.classList.add('text-gray-400');
+                }
+            });
+
+            // Reset progress bars
+            progressBars.forEach((bar, idx) => {
+                if (idx < index) bar.style.width = '100%';
+                else if (idx > index) bar.style.width = '0%';
+                else bar.style.width = '0%';
+            });
+
+            progressElapsed = 0;
+            progressStart = Date.now();
+        }
+
+        function updateProgress() {
+            if (isPlaying) {
+                const now = Date.now();
+                const delta = now - progressStart;
+                progressElapsed += delta;
+                progressStart = now;
+
+                const pct = Math.min((progressElapsed / DURATION_PER_SLIDE) * 100, 100);
+                if (progressBars[currentSlide]) {
+                    progressBars[currentSlide].style.width = pct + '%';
+                }
+
+                if (progressElapsed >= DURATION_PER_SLIDE) {
+                    nextSlide();
+                }
+            }
+            animFrameId = requestAnimationFrame(updateProgress);
+        }
+
+        function nextSlide() {
+            if (currentSlide < 3) {
+                showSlide(currentSlide + 1);
+            } else {
+                // Loop back or stay on last
+                showSlide(0);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            } else {
+                showSlide(3);
+            }
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const icon = document.getElementById('play-pause-icon');
+            const text = document.getElementById('play-pause-text');
+            if (isPlaying) {
+                progressStart = Date.now();
+                icon.className = 'fa-solid fa-pause mr-1.5';
+                text.textContent = 'Pause';
+            } else {
+                icon.className = 'fa-solid fa-play mr-1.5';
+                text.textContent = 'Play';
+            }
+        }
+
+        document.getElementById('btn-toggle-play').addEventListener('click', togglePlay);
+
+        // Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'Escape') {
+                window.location.href = '/';
+            }
+        });
+
+        // Touch Swipe Navigation for Mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) nextSlide();
+            if (touchEndX - touchStartX > 50) prevSlide();
+        }, { passive: true });
+
+        // Initialize
+        showSlide(0);
+        animFrameId = requestAnimationFrame(updateProgress);
+    </script>
+</body>
+</html>
