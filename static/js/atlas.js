@@ -12,7 +12,7 @@ const AtlasState = {
     selectedCommodity: null,
     selectedCategory: null,
     showChoropleth: true,
-    showHeatmap: false,
+    showHeatmap: true,
     showClusters: true,
     charts: {},
     indiaGeoJSON: null,
@@ -69,8 +69,11 @@ function initMap() {
 
 async function loadIndiaGeoJSON() {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson');
-        if (response.ok) {
+        let response = await fetch('/static/data/india-states.geojson').catch(() => null);
+        if (!response || !response.ok) {
+            response = await fetch('https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson').catch(() => null);
+        }
+        if (response && response.ok) {
             AtlasState.indiaGeoJSON = await response.json();
             renderChoropleth();
         } else {
@@ -100,18 +103,20 @@ function renderChoropleth() {
     const stateMandiMap = {};
 
     AtlasState.stateSummary.forEach(s => {
+        const key = (s.state || '').toLowerCase().trim();
         if (s.avg_modal_price) {
             if (s.avg_modal_price < minPrice) minPrice = s.avg_modal_price;
             if (s.avg_modal_price > maxPrice) maxPrice = s.avg_modal_price;
-            statePriceMap[s.state] = s.avg_modal_price;
+            statePriceMap[key] = s.avg_modal_price;
         }
-        stateMandiMap[s.state] = s.mandi_count || 0;
+        stateMandiMap[key] = s.mandi_count || 0;
     });
 
     AtlasState.choroplethLayer = L.geoJSON(AtlasState.indiaGeoJSON, {
         style: function (feature) {
             const stateName = matchStateName(feature.properties);
-            const price = statePriceMap[stateName];
+            const key = (stateName || '').toLowerCase().trim();
+            const price = statePriceMap[key];
             let color = '#ccc'; // default
             
             if (price && minPrice !== Infinity && maxPrice !== -Infinity && minPrice !== maxPrice) {
@@ -130,8 +135,9 @@ function renderChoropleth() {
         },
         onEachFeature: function (feature, layer) {
             const stateName = matchStateName(feature.properties) || "Unknown";
-            const price = statePriceMap[stateName];
-            const mandiCount = stateMandiMap[stateName] || 0;
+            const key = stateName.toLowerCase().trim();
+            const price = statePriceMap[key];
+            const mandiCount = stateMandiMap[key] || 0;
             
             let tooltipContent = `${stateName}`;
             if (price) {
@@ -186,26 +192,46 @@ function displayMarkets(markets) {
         if (!market.lat || !market.lng) return;
 
         let color = '#3B82F6'; // default blue
-        if (AtlasState.selectedCommodity && AtlasState.heatmapData.length > 0) {
-            const hm = AtlasState.heatmapData.find(h => h.market_id === market.id);
-            if (hm && hm.color_intensity !== undefined) {
-                color = priceToColor(hm.color_intensity);
-            } else {
-                color = '#9CA3AF'; // gray if no data for this commodity
+        if (AtlasState.showHeatmap) {
+            if (AtlasState.selectedCommodity && AtlasState.heatmapData.length > 0) {
+                const hm = AtlasState.heatmapData.find(h => h.market_id === market.id);
+                if (hm && hm.color_intensity !== undefined) {
+                    color = priceToColor(hm.color_intensity);
+                } else {
+                    color = '#9CA3AF'; // gray if no data for this commodity
+                }
+            } else if (market.avg_price) {
+                color = '#8B5CF6'; // purple for default avg
             }
-        } else if (market.avg_price) {
-            color = '#8B5CF6'; // purple for default avg
         }
 
         const icon = createMarkerIcon(color, 12);
         const marker = L.marker([market.lat, market.lng], { icon: icon });
         
+        let selectedCommInfo = '';
+        if (AtlasState.selectedCommodity && AtlasState.heatmapData.length > 0) {
+            const hm = AtlasState.heatmapData.find(h => h.market_id === market.id);
+            if (hm) {
+                const commObj = AtlasState.commodities.find(c => c.id === AtlasState.selectedCommodity);
+                const commName = commObj ? commObj.name : 'Commodity';
+                const trendIcon = hm.trend_7d > 0 ? '↑' : hm.trend_7d < 0 ? '↓' : '→';
+                const trendColor = hm.trend_7d > 0 ? 'text-green-600' : hm.trend_7d < 0 ? 'text-red-600' : 'text-gray-600';
+                selectedCommInfo = `
+                    <div class="bg-emerald-50 border border-emerald-200 rounded p-2 mb-2">
+                        <div class="text-xs font-semibold text-emerald-800">${commName}</div>
+                        <div class="text-base font-bold text-gray-900">${formatIndianCurrency(hm.modal_price)}/Qtl <span class="text-xs ${trendColor} font-semibold">${trendIcon} ${hm.trend_7d ? hm.trend_7d.toFixed(1) + '%' : ''}</span></div>
+                        <div class="text-[11px] text-gray-500">Min: ${formatIndianCurrency(hm.min_price)} | Max: ${formatIndianCurrency(hm.max_price)}</div>
+                    </div>
+                `;
+            }
+        }
+
         let topCommsHtml = '';
-        if (market.top_commodities && market.top_commodities.length > 0) {
-            topCommsHtml = market.top_commodities.map(tc => {
+        if (!selectedCommInfo && market.top_commodities && market.top_commodities.length > 0) {
+            topCommsHtml = market.top_commodities.slice(0, 4).map(tc => {
                 const trendIcon = tc.trend_7d > 0 ? '↑' : tc.trend_7d < 0 ? '↓' : '-';
                 const trendColor = tc.trend_7d > 0 ? 'text-green-500' : tc.trend_7d < 0 ? 'text-red-500' : 'text-gray-500';
-                return `<div class="flex justify-between text-sm">
+                return `<div class="flex justify-between text-sm py-0.5">
                     <span>${tc.commodity_name}</span>
                     <span class="font-medium">${formatIndianCurrency(tc.modal_price)} <span class="${trendColor}">${trendIcon}</span></span>
                 </div>`;
@@ -215,19 +241,20 @@ function displayMarkets(markets) {
         const stars = '★'.repeat(market.infrastructure_rating || 3) + '☆'.repeat(5 - (market.infrastructure_rating || 3));
 
         const popupHtml = `
-            <div class="atlas-popup p-2 min-w-[200px]">
-                <h3 class="font-bold text-lg text-gray-800">${market.name}</h3>
-                <p class="text-gray-500 text-sm">${market.district || ''}, ${market.state}</p>
-                <div class="text-yellow-500 text-sm my-1">${stars}</div>
-                <hr class="my-2">
+            <div class="atlas-popup p-2 min-w-[210px]">
+                <h3 class="font-bold text-base text-gray-900 leading-tight">${market.name}</h3>
+                <p class="text-gray-500 text-xs mb-1">${market.district || ''}, ${market.state}</p>
+                <div class="text-yellow-500 text-xs mb-2">${stars}</div>
+                ${selectedCommInfo}
                 ${topCommsHtml ? `
-                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Top Commodities</p>
+                    <hr class="my-1.5">
+                    <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-1">Top Commodities</p>
                     ${topCommsHtml}
-                    <hr class="my-2">
                 ` : ''}
-                <div class="mt-2 text-sm flex justify-between items-center">
-                    <span class="text-gray-600">Arrivals: ${(market.total_arrivals || 0).toLocaleString()} T</span>
-                    <a href="/market/${market.id || ''}" class="text-blue-600 font-medium hover:underline">Details →</a>
+                <hr class="my-2">
+                <div class="text-xs flex justify-between items-center">
+                    <span class="text-gray-600">Arr: ${(market.total_arrivals || 0).toLocaleString()} T</span>
+                    <a href="/?commodity=${AtlasState.selectedCommodity || ''}&market=${market.id}" class="text-emerald-700 font-semibold hover:underline flex items-center gap-1">Advisor →</a>
                 </div>
             </div>
         `;
@@ -334,12 +361,18 @@ function displayStateSummary(summaryData) {
 function drillDownToState(stateName) {
     AtlasState.selectedState = stateName;
     
+    const stateSelect = document.getElementById('atlas-state-filter');
+    if (stateSelect) stateSelect.value = stateName;
+
     const bc = document.getElementById('atlas-breadcrumb');
     if (bc) {
+        bc.classList.remove('hidden');
         bc.innerHTML = `
-            <a href="#" onclick="resetView(event)" class="text-blue-600 hover:underline">India</a>
+            <a href="#" onclick="resetView(event)" class="text-emerald-700 font-semibold hover:underline flex items-center gap-1 inline-flex">
+                <i class="fa-solid fa-earth-asia text-xs"></i> India
+            </a>
             <span class="mx-2 text-gray-400">/</span>
-            <span class="text-gray-800 font-medium">${stateName}</span>
+            <span class="text-gray-900 font-bold">${stateName}</span>
         `;
     }
 
@@ -348,9 +381,10 @@ function drillDownToState(stateName) {
     if (AtlasState.choroplethLayer) {
         let stateBounds = null;
         AtlasState.choroplethLayer.eachLayer(layer => {
-            if (matchStateName(layer.feature.properties) === stateName) {
+            const layerState = matchStateName(layer.feature.properties);
+            if (layerState && layerState.toLowerCase().trim() === stateName.toLowerCase().trim()) {
                 stateBounds = layer.getBounds();
-                layer.setStyle({ weight: 3, color: '#3B82F6', fillOpacity: 0.2 });
+                layer.setStyle({ weight: 3, color: '#059669', fillOpacity: 0.35 });
             } else {
                 layer.setStyle({ weight: 1, color: '#fff', fillOpacity: 0.1 });
             }
@@ -368,8 +402,12 @@ function resetView(e) {
     if (e) e.preventDefault();
     AtlasState.selectedState = null;
 
+    const stateSelect = document.getElementById('atlas-state-filter');
+    if (stateSelect) stateSelect.value = '';
+
     const bc = document.getElementById('atlas-breadcrumb');
     if (bc) {
+        bc.classList.add('hidden');
         bc.innerHTML = `<span class="text-gray-800 font-medium">India</span>`;
     }
 
@@ -389,16 +427,28 @@ function filterMarkets() {
     let filtered = AtlasState.allMarkets;
 
     if (AtlasState.selectedState) {
-        filtered = filtered.filter(m => m.state === AtlasState.selectedState);
+        filtered = filtered.filter(m => m.state.toLowerCase().trim() === AtlasState.selectedState.toLowerCase().trim());
+    }
+
+    if (AtlasState.selectedCategory && !AtlasState.selectedCommodity) {
+        const commIdsInCat = new Set(
+            AtlasState.commodities
+                .filter(c => c.category === AtlasState.selectedCategory)
+                .map(c => c.id)
+        );
+        filtered = filtered.filter(m => {
+            if (!m.top_commodities) return true;
+            return m.top_commodities.some(tc => commIdsInCat.has(tc.commodity_id));
+        });
     }
 
     const searchInput = document.getElementById('atlas-search');
     if (searchInput && searchInput.value) {
-        const q = searchInput.value.toLowerCase();
+        const q = searchInput.value.toLowerCase().trim();
         filtered = filtered.filter(m => 
-            m.name.toLowerCase().includes(q) || 
+            (m.name && m.name.toLowerCase().includes(q)) || 
             (m.district && m.district.toLowerCase().includes(q)) ||
-            m.state.toLowerCase().includes(q)
+            (m.state && m.state.toLowerCase().includes(q))
         );
     }
 
@@ -659,9 +709,15 @@ function createMarkerIcon(color, size = 12) {
 }
 
 function matchStateName(properties) {
-    const keys = ['NAME_1', 'name', 'NAME', 'ST_NM', 'state'];
+    if (!properties) return null;
+    const keys = ['state', 'NAME_1', 'name', 'NAME', 'ST_NM'];
     for (let k of keys) {
-        if (properties[k]) return properties[k];
+        if (properties[k]) {
+            let val = String(properties[k]).trim();
+            if (val.toLowerCase() === 'nct of delhi') val = 'Delhi';
+            if (val.toLowerCase() === 'orissa') val = 'Odisha';
+            return val;
+        }
     }
     return null;
 }
@@ -763,17 +819,31 @@ function setupEventListeners() {
         catSelect.addEventListener('change', (e) => {
             AtlasState.selectedCategory = e.target.value;
             if (commSelect) {
-                Array.from(commSelect.options).forEach(opt => {
-                    if (opt.value === "") return;
-                    const comm = AtlasState.commodities.find(c => c.id === opt.value);
-                    if (comm) {
-                        opt.style.display = (!AtlasState.selectedCategory || comm.category === AtlasState.selectedCategory) ? '' : 'none';
-                    }
-                });
+                commSelect.innerHTML = '<option value="">All Commodities</option>';
+                const byCat = {};
+                AtlasState.commodities
+                    .filter(c => !AtlasState.selectedCategory || c.category === AtlasState.selectedCategory)
+                    .forEach(c => {
+                        if (!byCat[c.category]) byCat[c.category] = [];
+                        byCat[c.category].push(c);
+                    });
+
+                for (const [cat, comms] of Object.entries(byCat)) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = cat;
+                    comms.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.name;
+                        optgroup.appendChild(opt);
+                    });
+                    commSelect.appendChild(optgroup);
+                }
                 commSelect.value = "";
                 AtlasState.selectedCommodity = null;
                 applyHeatmap(null);
                 fetchAndDisplayStateSummary();
+                filterMarkets();
             }
         });
     }
@@ -781,6 +851,11 @@ function setupEventListeners() {
     const searchInp = document.getElementById('atlas-search');
     if (searchInp) {
         searchInp.addEventListener('input', searchMarkets);
+    }
+
+    const resetBtn = document.getElementById('reset-map-view');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', (e) => resetView(e));
     }
 
     const toggleChoro = document.getElementById('toggle-choropleth');
@@ -795,9 +870,7 @@ function setupEventListeners() {
     if (toggleHeatmap) {
         toggleHeatmap.addEventListener('change', (e) => {
             AtlasState.showHeatmap = e.target.checked;
-            if (AtlasState.selectedCommodity) {
-                displayMarkets(AtlasState.rawMarkers.map(m => m.marketData)); 
-            }
+            filterMarkets();
         });
     }
 

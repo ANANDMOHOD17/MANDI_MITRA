@@ -40,6 +40,18 @@ def load_data():
         else:
             db['prices'] = []
             
+        # Index prices by (market_id, commodity_id) for O(1) lookups
+        db['prices_by_mc'] = {}
+        for p in db['prices']:
+            key = (p.get('market_id'), p.get('commodity_id'))
+            if key not in db['prices_by_mc']:
+                db['prices_by_mc'][key] = []
+            db['prices_by_mc'][key].append(p)
+            
+        # Sort each list by date descending once so calculate_trend is fast
+        for key in db['prices_by_mc']:
+            db['prices_by_mc'][key].sort(key=lambda x: x.get('date', ''), reverse=True)
+            
     except Exception as e:
         print(f"Error loading data: {e}")
 
@@ -58,7 +70,7 @@ def haversine(lat1, lon1, lat2, lon2):
     return d
 
 def get_prices_for_market_commodity(market_id, commodity_id):
-    return [p for p in db['prices'] if p.get('market_id') == market_id and p.get('commodity_id') == commodity_id]
+    return db.get('prices_by_mc', {}).get((market_id, commodity_id), [])
 
 def calculate_trend(prices, days):
     if not prices:
@@ -358,6 +370,11 @@ def atlas_page():
 def reports_page():
     return render_template('reports.html')
 
+@app.route('/market/<market_id>')
+def market_redirect(market_id):
+    from flask import redirect
+    return redirect(f'/?market={market_id}')
+
 @app.route('/api/atlas/markets')
 def get_atlas_markets():
     result = []
@@ -415,7 +432,7 @@ def get_atlas_markets():
 def get_atlas_heatmap():
     commodity_id = request.args.get('commodity_id')
     if not commodity_id:
-        return jsonify({"error": "commodity_id is required"}), 400
+        return jsonify([])
         
     c_prices = [p for p in db['prices'] if p.get('commodity_id') == commodity_id]
     if not c_prices:
