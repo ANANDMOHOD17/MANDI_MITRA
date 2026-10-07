@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Mandi Price Advisor | स्मार्ट मंडी मूल्य सलाहकार</title>
+    <script>
+        if (!sessionStorage.getItem('intro_seen') && !window.location.search.includes('skip=1')) {
+            sessionStorage.setItem('intro_seen', 'true');
+            window.location.replace('/intro');
+        }
+    </script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,9 +77,6 @@
                 <a href="/live" class="px-3.5 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
                     <i class="fa-solid fa-tower-broadcast mr-1 text-red-400"></i> <span data-i18n="nav_live">Live Prices</span>
                 </a>
-                <a href="/intro" class="px-3 py-2 rounded-lg bg-amber-400 bg-opacity-20 hover:bg-opacity-30 font-semibold text-amber-200 hover:text-white transition-all border border-amber-300 border-opacity-30">
-                    <i class="fa-solid fa-film mr-1 text-amber-300"></i> <span data-i18n="nav_intro">Intro Tour</span>
-                </a>
             </nav>
             <!-- Mobile menu button -->
             <button id="mobile-menu-btn" class="md:hidden text-white text-2xl" onclick="document.getElementById('mobile-nav').classList.toggle('hidden')">
@@ -86,7 +89,6 @@
             <a href="/atlas" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-map-location-dot mr-2"></i><span data-i18n="nav_atlas">Market Atlas</span></a>
             <a href="/reports" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-table-list mr-2"></i><span data-i18n="nav_reports">Reports</span></a>
             <a href="/live" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-tower-broadcast mr-2 text-red-400"></i><span data-i18n="nav_live">Live Prices</span></a>
-            <a href="/intro" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-amber-300 font-semibold"><i class="fa-solid fa-film mr-2"></i><span data-i18n="nav_intro">Intro Tour</span></a>
         </div>
     </header>
 

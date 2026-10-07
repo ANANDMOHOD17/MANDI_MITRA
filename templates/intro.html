@@ -115,7 +115,7 @@
         <div class="text-[11px] mono tracking-widest text-gray-400">
             SMART MANDI INTRO • <span id="hud-timer" class="text-white font-bold">3.00s</span>
         </div>
-        <a href="/" class="text-xs text-gray-300 hover:text-white glass-hud px-3 py-1 rounded-md transition-colors flex items-center">
+        <a href="/?skip=1" onclick="sessionStorage.setItem('intro_seen', 'true')" class="text-xs text-gray-300 hover:text-white glass-hud px-3 py-1 rounded-md transition-colors flex items-center">
             Skip to Dashboard <i class="fa-solid fa-forward-step ml-1.5 text-emerald-400"></i>
         </a>
     </div>
@@ -371,8 +371,9 @@
             finaleOverlay.style.pointerEvents = 'auto';
 
             // Flash cut straight to dashboard
+            sessionStorage.setItem('intro_seen', 'true');
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/?skip=1';
             }, 350);
         }
 
@@ -393,7 +394,8 @@
         // Press any key to skip immediately
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
-                window.location.href = '/';
+                sessionStorage.setItem('intro_seen', 'true');
+                window.location.href = '/?skip=1';
             }
         });
     </script>

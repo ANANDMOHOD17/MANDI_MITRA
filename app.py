@@ -3,13 +3,14 @@ import json
 import math
 import statistics
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, session, redirect
 from flask_cors import CORS
 import sys
 from data.live_data import fetch_live_prices, get_all_states, get_districts, get_commodities_list, refresh_cache, get_live_data
 from data.chatbot import answer_query
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+app.secret_key = os.environ.get('SECRET_KEY', 'mandi_mitra_session_secret_key_2026')
 CORS(app)
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -152,10 +153,19 @@ def generate_explanation(rank, market_data):
 
 @app.route('/')
 def index():
+    if request.args.get('intro') == '1':
+        return redirect('/intro')
+    if request.args.get('skip') == '1':
+        session['intro_seen'] = True
+        return render_template('index.html')
+    if not session.get('intro_seen'):
+        session['intro_seen'] = True
+        return redirect('/intro')
     return render_template('index.html')
 
 @app.route('/intro')
 def intro_page():
+    session['intro_seen'] = True
     return render_template('intro.html')
 
 @app.route('/api/commodities', methods=['GET'])
