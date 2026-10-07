@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Mandi Prices | Smart Mandi Price Advisor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            light: '#10B981',
+                            DEFAULT: '#059669',
+                            dark: '#047857',
+                            accent: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .pulse-dot {
+            height: 12px;
+            width: 12px;
+            background-color: #10B981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .skeleton { animation: pulse-skel 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background-color: #e5e7eb; }
+        @keyframes pulse-skel { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header/Navbar -->
+    <header class="bg-brand text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-3 hover:opacity-90 transition-opacity">
+                <i class="fa-solid fa-wheat-awn text-3xl text-brand-accent"></i>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold leading-tight">Smart Mandi Price Advisor</h1>
+                    <h2 class="text-xs md:text-sm text-green-100 font-medium">स्मार्ट मंडी मूल्य सलाहकार</h2>
+                </div>
+            </a>
+            <nav class="hidden md:flex items-center space-x-1">
+                <a href="index.html" class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
+                    <i class="fa-solid fa-chart-line mr-1"></i> <span data-i18n="nav_advisor">Price Advisor</span>
+                </a>
+                <a href="atlas.html" class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
+                    <i class="fa-solid fa-map-location-dot mr-1"></i> <span data-i18n="nav_atlas">Market Atlas</span>
+                </a>
+                <a href="reports.html" class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 font-medium text-green-100 hover:text-white transition-all">
+                    <i class="fa-solid fa-table-list mr-1"></i> <span data-i18n="nav_reports">Reports</span>
+                </a>
+                <a href="live.html" class="px-4 py-2 rounded-lg bg-white bg-opacity-20 font-semibold text-white transition-all">
+                    <i class="fa-solid fa-tower-broadcast mr-1 text-red-400"></i> <span data-i18n="nav_live">Live Prices</span>
+                </a>
+            </nav>
+            <button id="mobile-menu-btn" class="md:hidden text-white text-2xl" onclick="document.getElementById('mobile-nav').classList.toggle('hidden')">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+        <div id="mobile-nav" class="hidden md:hidden border-t border-green-600 bg-brand-dark">
+            <a href="index.html" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-chart-line mr-2"></i><span data-i18n="nav_advisor">Price Advisor</span></a>
+            <a href="atlas.html" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-map-location-dot mr-2"></i><span data-i18n="nav_atlas">Market Atlas</span></a>
+            <a href="reports.html" class="block px-4 py-3 hover:bg-white hover:bg-opacity-10 text-green-100"><i class="fa-solid fa-table-list mr-2"></i><span data-i18n="nav_reports">Reports</span></a>
+            <a href="live.html" class="block px-4 py-3 bg-white bg-opacity-10 font-semibold text-white"><i class="fa-solid fa-tower-broadcast mr-2 text-red-400"></i><span data-i18n="nav_live">Live Prices</span></a>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-2">
+                <span class="pulse-dot"></span>
+                <h1 class="text-2xl font-bold">🔴 Live Mandi Prices</h1>
+            </div>
+            <div class="text-sm text-gray-600 bg-white px-3 py-1 rounded-full shadow-sm">
+                <i class="fa-solid fa-clock mr-1"></i> Auto-refresh in: <span id="refresh-timer" class="font-mono font-bold text-brand">300</span>s
+                <button id="manual-refresh" class="ml-2 text-brand hover:text-brand-dark" title="Refresh Now"><i class="fa-solid fa-sync"></i></button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-gray-500 text-sm font-semibold uppercase">Total Records Today</div>
+                <div id="summary-records" class="text-2xl font-bold mt-1">--</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-gray-500 text-sm font-semibold uppercase">States Reporting</div>
+                <div id="summary-states" class="text-2xl font-bold mt-1">--</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-gray-500 text-sm font-semibold uppercase">Highest Priced</div>
+                <div id="summary-highest" class="text-xl font-bold mt-1 text-green-600">--</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div class="text-gray-500 text-sm font-semibold uppercase">Lowest Priced</div>
+                <div id="summary-lowest" class="text-xl font-bold mt-1 text-red-500">--</div>
+            </div>
+        </div>
+
+        <div id="status-message" class="hidden mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-800 border border-yellow-200">
+            <i class="fa-solid fa-triangle-exclamation mr-2"></i><span id="status-text">Data is coming from cache. Live API unavailable.</span>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                <select id="filter-state" class="w-full border-gray-300 rounded-lg shadow-sm p-2 border focus:border-brand focus:ring-brand">
+                    <option value="">All States</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                <select id="filter-district" class="w-full border-gray-300 rounded-lg shadow-sm p-2 border focus:border-brand focus:ring-brand" disabled>
+                    <option value="">All Districts</option>
+                </select>
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Commodity</label>
+                <select id="filter-commodity" class="w-full border-gray-300 rounded-lg shadow-sm p-2 border focus:border-brand focus:ring-brand">
+                    <option value="">All Commodities</option>
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button id="btn-search" class="bg-brand text-white px-4 py-2 rounded-lg hover:bg-brand-dark transition-colors"><i class="fa-solid fa-magnifying-glass mr-1"></i> Search</button>
+                <button id="btn-reset" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"><i class="fa-solid fa-xmark mr-1"></i> Reset</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+            <div class="flex justify-between items-center p-4 border-b bg-gray-50">
+                <h3 class="font-bold text-gray-800">Price Data</h3>
+                <button id="btn-export" class="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded border border-blue-200 hover:bg-blue-100"><i class="fa-solid fa-download mr-1"></i> Export CSV</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 text-sm uppercase tracking-wider">
+                            <th class="p-3 cursor-pointer hover:bg-gray-200" data-sort="state">State <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200" data-sort="district">District <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200" data-sort="market">Market <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200" data-sort="commodity">Commodity <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200" data-sort="variety">Variety <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200 text-right" data-sort="min_price">Min (₹) <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200 text-right" data-sort="max_price">Max (₹) <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200 text-right font-bold text-brand" data-sort="modal_price">Modal (₹) <i class="fa-solid fa-sort ml-1"></i></th>
+                            <th class="p-3 cursor-pointer hover:bg-gray-200" data-sort="arrival_date">Date <i class="fa-solid fa-sort ml-1"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="9" class="p-8 text-center text-gray-500">
+                                <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-2 text-brand"></i>
+                                <p>Loading live data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="p-4 border-t bg-gray-50 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Showing <span id="page-start" class="font-bold">0</span> to <span id="page-end" class="font-bold">0</span> of <span id="page-total" class="font-bold">0</span> entries
+                </div>
+                <div class="flex space-x-1">
+                    <button id="btn-prev" class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-50"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="page-current" class="px-3 py-1 border rounded bg-brand text-white">1</span>
+                    <button id="btn-next" class="px-3 py-1 border rounded bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-50"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-auto py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2026 Smart Mandi Price Advisor. Powered by Data.gov.in.</p>
+        </div>
+    </footer>
+
+    <script src="static/js/client-api.js"></script>
+    <script src="static/js/i18n.js"></script>
+    <script src="static/js/live.js"></script>
+    <script src="static/js/chatbot.js"></script>
+</body>
+</html>

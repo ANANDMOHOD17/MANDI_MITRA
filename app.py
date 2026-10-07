@@ -152,6 +152,7 @@ def generate_explanation(rank, market_data):
 
 
 @app.route('/')
+@app.route('/index.html')
 def index():
     if request.args.get('intro') == '1':
         return redirect('/intro')
@@ -164,6 +165,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/intro')
+@app.route('/intro.html')
 def intro_page():
     session['intro_seen'] = True
     return render_template('intro.html')
@@ -471,10 +473,12 @@ import csv
 from flask import Response
 
 @app.route('/atlas')
+@app.route('/atlas.html')
 def atlas_page():
     return render_template('atlas.html')
 
 @app.route('/reports')
+@app.route('/reports.html')
 def reports_page():
     return render_template('reports.html')
 
@@ -901,6 +905,7 @@ def get_reports_download():
     )
 
 @app.route('/live')
+@app.route('/live.html')
 def live_page():
     return render_template('live.html')
 
